@@ -1,0 +1,28 @@
+name: RepoMemory read-only checks
+on:
+  push:
+    paths:
+      - 'memory/**'
+      - 'tools/repomemory/**'
+      - 'scripts/repo-memory-smoke.sh'
+      - '.github/workflows/repo-memory-readonly.yml'
+  pull_request:
+    paths:
+      - 'memory/**'
+      - 'tools/repomemory/**'
+      - 'scripts/repo-memory-smoke.sh'
+      - '.github/workflows/repo-memory-readonly.yml'
+permissions:
+  contents: read
+jobs:
+  repo-memory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.2'
+      - run: go test -count=1 tools/repomemory/main.go tools/repomemory/main_test.go
+      - run: go test -race -count=1 tools/repomemory/main.go tools/repomemory/main_test.go
+      - run: go vet tools/repomemory/main.go tools/repomemory/main_test.go
+      - run: sh scripts/repo-memory-smoke.sh

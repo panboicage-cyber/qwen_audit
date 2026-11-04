@@ -1,0 +1,5 @@
+# Routing hint only. This does not enforce review until GitHub branch protection
+# or a ruleset requires code-owner review from a genuinely separate reviewer.
+/memory/ @panboicage-cyber
+/tools/repomemory/ @panboicage-cyber
+/scripts/repo-memory-smoke.sh @panboicage-cyber
