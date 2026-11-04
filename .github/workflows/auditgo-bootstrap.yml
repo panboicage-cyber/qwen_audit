@@ -1,0 +1,29 @@
+name: AuditGo bootstrap checks
+on:
+  pull_request:
+    paths:
+      - 'scripts/setup-auditgo.sh'
+      - 'scripts/auditgo-smoke.sh'
+      - 'vendor/**'
+      - '.github/workflows/auditgo-bootstrap.yml'
+  push:
+    paths:
+      - 'scripts/setup-auditgo.sh'
+      - 'scripts/auditgo-smoke.sh'
+      - 'vendor/**'
+      - '.github/workflows/auditgo-bootstrap.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell syntax
+        run: |
+          sh -n scripts/setup-auditgo.sh
+          sh -n scripts/auditgo-smoke.sh
+      - name: Verify pinned archive and smoke
+        run: |
+          sh scripts/setup-auditgo.sh
+          sh scripts/auditgo-smoke.sh

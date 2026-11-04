@@ -1,0 +1,8 @@
+1c7d251083fe1d7f6b8d80b65dbefe85f3995f74ac1411e1aad1e91b4a1f8c3f  ./.github/workflows/auditgo-bootstrap.yml
+5f19e8682f8d18486d3d32e1d7cab5d8839691f330204da2517d3d0f855665ab  ./AGENTS.md
+9c095eeaceb52feee77392b886933144502a9889b1b7cb90bdaca58e817f5907  ./AUDITGO_SETUP.md
+8f0f5825758d3b6ed8aefac6da0a08fb4445ad7fa8b0a96ca166015212320f59  ./docs/AUDITGO-QWEN.md
+afb4b321c595a594c4e0a66c0e5df0e412ec455fe22d67067ddd65b716a6c419  ./scripts/auditgo-smoke.sh
+0a2445df5dde5829e25f1127f046bed52792cb82faa4fd2e8cd5cfa45b79498a  ./scripts/setup-auditgo.sh
+8c8625be74e54b70867196c88312d61b78b28f5737c81b7245b8339ca2e57640  ./vendor/AuditGo_v0.1.3_Crush_Hermes_Linux.tar.gz
+65df8bd402a2caaf86af07f9183263a7bd368cb493eb63b22076f7ea05152514  ./vendor/README.md
