@@ -113,3 +113,168 @@ func TestUnsupportedCommandsAreRefused(t *testing.T) {
 		}
 	}
 }
+
+// Rewrite one boolean in an isolated copy of the baseline. For a target lock,
+// rebind its SHA in the stage to test the actual schema check rather than an
+// unrelated digest mismatch. No canonical staging or source files are edited.
+func rewriteBooleanFixture(t *testing.T, root, path, field string, itemIndex int, replacement string) {
+	t.Helper()
+	file := filepath.Join(root, path)
+	data, err := os.ReadFile(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	if itemIndex >= 0 {
+		var items []map[string]json.RawMessage
+		if err := json.Unmarshal(obj["items"], &items); err != nil {
+			t.Fatal(err)
+		}
+		if itemIndex >= len(items) {
+			t.Fatalf("queue index %d out of bounds", itemIndex)
+		}
+		if _, ok := items[itemIndex][field]; !ok {
+			t.Fatalf("fixture key missing: %s", field)
+		}
+		if replacement == "" {
+			delete(items[itemIndex], field)
+		} else {
+			items[itemIndex][field] = json.RawMessage(replacement)
+		}
+		obj["items"], err = json.Marshal(items)
+		if err != nil {
+			t.Fatal(err)
+		}
+	} else {
+		if _, ok := obj[field]; !ok {
+			t.Fatalf("fixture key missing: %s", field)
+		}
+		if replacement == "" {
+			delete(obj, field)
+		} else {
+			obj[field] = json.RawMessage(replacement)
+		}
+	}
+	changed, err := json.MarshalIndent(obj, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	changed = append(changed, '\n')
+	if err := os.WriteFile(file, changed, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if path == "profiles/gen-type-go-pr6/target.lock.json" {
+		stageFile := filepath.Join(root, "staging_audit/branches/gen-type-go-pr6.json")
+		stageData, err := os.ReadFile(stageFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var stage map[string]json.RawMessage
+		if err := json.Unmarshal(stageData, &stage); err != nil {
+			t.Fatal(err)
+		}
+		stage["lock_sha256"], err = json.Marshal(sha(changed))
+		if err != nil {
+			t.Fatal(err)
+		}
+		stageData, err = json.MarshalIndent(stage, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(stageFile, append(stageData, '\n'), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func TestAllBooleanContractsRequireExplicitJSONLiterals(t *testing.T) {
+	fields := []struct {
+		scope string
+		path  string
+		key   string
+		item  int
+	}{
+		{"workspace", "staging_audit/workspace.json", "allow_auto_execute", -1},
+		{"workspace", "staging_audit/workspace.json", "allow_runtime_memory_writes", -1},
+		{"workspace", "staging_audit/workspace.json", "allow_merge", -1},
+		{"workspace", "staging_audit/workspace.json", "allow_publish", -1},
+		{"queue-active", "staging_audit/queue.json", "enabled", 0},
+		{"queue-disabled", "staging_audit/queue.json", "enabled", 1},
+		{"stage-active", "staging_audit/branches/gen-type-go-pr6.json", "requires_explicit_execution", -1},
+		{"stage-active", "staging_audit/branches/gen-type-go-pr6.json", "allow_upstream_mutation", -1},
+		{"stage-active", "staging_audit/branches/gen-type-go-pr6.json", "allow_merge", -1},
+		{"stage-active", "staging_audit/branches/gen-type-go-pr6.json", "allow_release", -1},
+		{"stage-disabled", "staging_audit/branches/kol-merkle-pr4.json", "requires_explicit_execution", -1},
+		{"stage-disabled", "staging_audit/branches/kol-merkle-pr4.json", "allow_upstream_mutation", -1},
+		{"stage-disabled", "staging_audit/branches/kol-merkle-pr4.json", "allow_merge", -1},
+		{"stage-disabled", "staging_audit/branches/kol-merkle-pr4.json", "allow_release", -1},
+		{"lock", "profiles/gen-type-go-pr6/target.lock.json", "upstream_mutations_authorized", -1},
+		{"lock", "profiles/gen-type-go-pr6/target.lock.json", "merge_authorized", -1},
+		{"lock", "profiles/gen-type-go-pr6/target.lock.json", "release_authorized", -1},
+		{"lock", "profiles/gen-type-go-pr6/target.lock.json", "new_authority_authorized", -1},
+	}
+	mutations := []struct {
+		name        string
+		replacement string
+		want        string
+	}{
+		{"missing", "", "missing required boolean"},
+		{"null", "null", "must be explicit JSON boolean"},
+		{"quoted-false", `"false"`, "must be explicit JSON boolean"},
+		{"numeric-zero", "0", "must be explicit JSON boolean"},
+	}
+	for _, f := range fields {
+		for _, m := range mutations {
+			t.Run(f.scope+"/"+f.key+"/"+m.name, func(t *testing.T) {
+				root := cloneMinimal(t)
+				rewriteBooleanFixture(t, root, f.path, f.key, f.item, m.replacement)
+				_, _, _, _, _, err := check(root)
+				if err == nil || !strings.Contains(err.Error(), f.key) {
+					t.Fatalf("expected rejection for %s, got %v", f.key, err)
+				}
+				// Go already rejects strings and numbers for bool fields during
+				// typed decode; the repair closes missing/null bypasses. Preserve
+				// either valid rejection diagnostic rather than requiring a new one.
+				diagnostic := err.Error()
+				switch m.name {
+				case "missing":
+					if !strings.Contains(diagnostic, "missing required boolean") && !strings.Contains(diagnostic, "missing lock field") {
+						t.Fatalf("expected missing-field rejection, got %v", err)
+					}
+				case "null":
+					if !strings.Contains(diagnostic, m.want) {
+						t.Fatalf("expected null rejection, got %v", err)
+					}
+				default:
+					if !strings.Contains(diagnostic, m.want) && !strings.Contains(diagnostic, "cannot unmarshal") {
+						t.Fatalf("expected wrong-type rejection, got %v", err)
+					}
+				}
+			})
+		}
+	}
+}
+
+func TestLockBooleanNullRejectedWithoutHashGuard(t *testing.T) {
+	root := repoRoot(t)
+	data, err := os.ReadFile(filepath.Join(root, "profiles/gen-type-go-pr6/target.lock.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		t.Fatal(err)
+	}
+	raw["merge_authorized"] = json.RawMessage("null")
+	data, err = json.Marshal(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var lock Lock
+	if err := decodeLock(data, &lock); err == nil || !strings.Contains(err.Error(), "merge_authorized") {
+		t.Fatalf("decodeLock accepted null: %v", err)
+	}
+}
