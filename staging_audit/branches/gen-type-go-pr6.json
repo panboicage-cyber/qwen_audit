@@ -1,0 +1,19 @@
+{
+  "schema": "qwen-master-audit.stage/v1",
+  "id": "gen-type-go-pr6",
+  "status": "STAGED",
+  "source_branch": "feat/gen-type-go-pr6-deterministic-audit",
+  "source_branch_commit": "f046b362a482d1fa4d557df284db3cf39bf0a55d",
+  "target_repository": "https://github.com/es-3581100/Gen_Type-go.git",
+  "target_head": "0af4707d66bb30aef09fe80316c408568e256e53",
+  "lock_path": "profiles/gen-type-go-pr6/target.lock.json",
+  "lock_sha256": "d1e8e7cee0c54f996d8f6d4544d20488f51d3f22262146bb77459d472875c376",
+  "runner_path": "scripts/replay-gen-type-go-pr6.sh",
+  "runner_sha256": "eac8d9d2be420ded86eee474ad8ee3c63cbf93340bec9b60709e9ff7b36adda2",
+  "prompt_path": "prompts/staged-gen-type-go-pr6.md",
+  "prompt_sha256": "0459f22fadedfed3180c30933943bcfcd09e66248f0ade94f3c5d5e3fe278576",
+  "requires_explicit_execution": true,
+  "allow_upstream_mutation": false,
+  "allow_merge": false,
+  "allow_release": false
+}

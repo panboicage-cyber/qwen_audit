@@ -1,0 +1,80 @@
+{
+  "schema": "qwen-audit.repo-memory/v1",
+  "ownership": "repository_curated",
+  "access": "READ_ONLY",
+  "capture": "DISABLED",
+  "records": [
+    {
+      "id": "audit.authorization.boundary",
+      "kind": "POLICY",
+      "summary": "Technical audit results never grant approval, merge, release, or deployment authority.",
+      "detail": "Auditing is read-only against target source. A PR conversation comment may be written only under the actual authorized GitHub identity; formal approval, source edits, merge, release, deployment, and permissions changes are not authorized by the audit result.",
+      "source_path": "AUDIT_POLICY.md",
+      "source_ref": "af6609fae097efe80742025b0b5bf27b9acfccea"
+    },
+    {
+      "id": "audit.evidence.classes",
+      "kind": "POLICY",
+      "summary": "Evidence classes are EXECUTED, OBSERVED, REPORTED, and UNVERIFIED.",
+      "detail": "EXECUTED requires commands and captured outputs from this run. OBSERVED is source or hosted evidence inspected directly. REPORTED is inherited assertion. UNVERIFIED means insufficient evidence. Never relabel inherited evidence as executed.",
+      "source_path": "AUDIT_POLICY.md",
+      "source_ref": "af6609fae097efe80742025b0b5bf27b9acfccea"
+    },
+    {
+      "id": "audit.outcomes",
+      "kind": "POLICY",
+      "summary": "Repository-level outcomes are AUDIT_PASS, AUDIT_FAIL, and AUDIT_INCOMPLETE.",
+      "detail": "AUDIT_PASS means adequate verification for an explicitly bounded scope without blocking findings; AUDIT_FAIL requires a confirmed reproducible in-scope blocker; AUDIT_INCOMPLETE means essential evidence is unavailable. AuditGo's internal risk/completeness contract is supplementary, not a substitute.",
+      "source_path": "AUDIT_POLICY.md",
+      "source_ref": "af6609fae097efe80742025b0b5bf27b9acfccea"
+    },
+    {
+      "id": "audit.target.isolation",
+      "kind": "WORKFLOW",
+      "summary": "The audit workspace is not the repository being audited; targets require separate pinned checkouts.",
+      "detail": "Use a disposable sandbox for target source and fixtures. Verify the target repository URL and exact revision independently of the qwen_audit workspace revision. Do not execute untrusted code where production credentials are exposed.",
+      "source_path": "QWEN_RECOVERY.md",
+      "source_ref": "af6609fae097efe80742025b0b5bf27b9acfccea"
+    },
+    {
+      "id": "audit.target.kol_merkle_pr4",
+      "kind": "HISTORICAL_TARGET",
+      "summary": "Initial historical assignment: kol_merkle PR #4, candidate c64502cb5db3efd9316991ce1c0756d97729a6c3.",
+      "detail": "This is a pinned 2026-11-03 starter assignment, not a claim about the current PR head, merge state, or future review scope. Re-verify the live target and owner instructions before auditing.",
+      "source_path": "README.md",
+      "source_ref": "af6609fae097efe80742025b0b5bf27b9acfccea"
+    },
+    {
+      "id": "audit.workspace.identity",
+      "kind": "WORKFLOW",
+      "summary": "panboicage-cyber/qwen_audit is an evidence-first review workspace, not a mirror of targets.",
+      "detail": "Its tracked materials are instructions, review templates, and replay helpers. Do not interpret the workspace SHA, absent go.mod, or project structure as the target's source provenance.",
+      "source_path": "README.md",
+      "source_ref": "af6609fae097efe80742025b0b5bf27b9acfccea"
+    },
+    {
+      "id": "auditgo.bootstrap.identity",
+      "kind": "BOOTSTRAP",
+      "summary": "AuditGo v0.1.3 bootstrap is pinned to a Linux archive and binary with SHA-256 checks.",
+      "detail": "The Qwen bootstrap candidate uses archive SHA-256 8c8625be74e54b70867196c88312d61b78b28f5737c81b7245b8339ca2e57640 and binary SHA-256 b6c55aa3822c4dc6ae045c6a1f697a8f75903902e9e22ba957fa2e11f3a51a1f. Always verify installed bytes rather than assuming this historical claim stays true.",
+      "source_path": "scripts/setup-auditgo.sh",
+      "source_ref": "c1ed4143d9ceceb091a97baccb5e3afd12ea74b2"
+    },
+    {
+      "id": "auditgo.smoke.boundary",
+      "kind": "BOOTSTRAP",
+      "summary": "AUDITGO_SMOKE_PASS proves configuration planning, not a completed repository audit.",
+      "detail": "The installed AuditGo CLI can validate its registry and render a planning mission. Actual source inspection, evidence gathering, independent adversarial review, and closeout are separate gates.",
+      "source_path": "scripts/auditgo-smoke.sh",
+      "source_ref": "c1ed4143d9ceceb091a97baccb5e3afd12ea74b2"
+    },
+    {
+      "id": "publication.identity",
+      "kind": "POLICY",
+      "summary": "Publishing review text requires verified identity and permissions; no invented publication evidence.",
+      "detail": "If the configured GitHub identity cannot post a PR conversation comment on the audited repository, return a comment draft and mark publication incomplete. Never report an AI comment as an independent human approval.",
+      "source_path": "QWEN_RECOVERY.md",
+      "source_ref": "af6609fae097efe80742025b0b5bf27b9acfccea"
+    }
+  ]
+}

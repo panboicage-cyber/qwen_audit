@@ -1,0 +1,39 @@
+name: Master audit workspace validation
+on:
+  pull_request:
+  push:
+    branches:
+      - master_audit_workspace
+permissions:
+  contents: read
+jobs:
+  validate-curated-master:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.2'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Integrity of unified overlay
+        run: sha256sum -c OVERLAY_SHA256SUMS.txt
+      - name: Shell parsing
+        run: |
+          sh -n scripts/setup-master-audit-workspace.sh
+          sh -n scripts/stage-audit.sh
+          bash -n scripts/replay-gen-type-go-pr6.sh
+      - name: Go validator tests
+        run: |
+          go test -count=1 ./tools/masteraudit/main.go ./tools/masteraudit/main_test.go
+          go test -race -count=1 ./tools/masteraudit/main.go ./tools/masteraudit/main_test.go
+          go vet ./tools/masteraudit/main.go ./tools/masteraudit/main_test.go
+      - name: Typed queue projection tests (no dependencies installed)
+        run: node --experimental-strip-types --test tools/masteraudit/queue.test.mjs
+      - name: Curated memory checks
+        run: sh scripts/repo-memory-smoke.sh
+      - name: Bootstrap and CLI planning only
+        run: sh scripts/setup-master-audit-workspace.sh
+      - name: Stage preparation (never target replay)
+        run: sh scripts/stage-audit.sh gen-type-go-pr6

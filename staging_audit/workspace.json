@@ -1,0 +1,12 @@
+{
+  "schema": "qwen-master-audit.workspace/v1",
+  "name": "master_audit_workspace",
+  "setup": "scripts/setup-master-audit-workspace.sh",
+  "auditgo": "scripts/setup-auditgo.sh",
+  "memory": "memory/catalog.json",
+  "queue": "staging_audit/queue.json",
+  "allow_auto_execute": false,
+  "allow_runtime_memory_writes": false,
+  "allow_merge": false,
+  "allow_publish": false
+}
