@@ -1,0 +1,19 @@
+{
+  "schema": "qwen-master-audit.stage/v1",
+  "id": "kol-merkle-pr4",
+  "status": "REFERENCE_ONLY",
+  "source_branch": "main",
+  "source_branch_commit": "af6609fae097efe80742025b0b5bf27b9acfccea",
+  "target_repository": "https://github.com/donCannoli-burns/kol_merkle.git",
+  "target_head": "c64502cb5db3efd9316991ce1c0756d97729a6c3",
+  "lock_path": "",
+  "lock_sha256": "",
+  "runner_path": "scripts/replay-kol-merkle-pr4.sh",
+  "runner_sha256": "5fd2c73105a1d89db3578c1d3c57340656c226448124f925982c57bc022db026",
+  "prompt_path": "prompts/kol-merkle-pr4.md",
+  "prompt_sha256": "8175654aee395e778cc583735b819d95337b28b16d3fe0b172ca5081cea84d87",
+  "requires_explicit_execution": true,
+  "allow_upstream_mutation": false,
+  "allow_merge": false,
+  "allow_release": false
+}

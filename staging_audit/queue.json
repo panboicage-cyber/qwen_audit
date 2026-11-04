@@ -1,0 +1,16 @@
+{
+  "schema": "qwen-master-audit.queue/v1",
+  "strategy": "ORDERED_EXPLICIT_SELECTION",
+  "items": [
+    {
+      "id": "gen-type-go-pr6",
+      "stage": "staging_audit/branches/gen-type-go-pr6.json",
+      "enabled": true
+    },
+    {
+      "id": "kol-merkle-pr4",
+      "stage": "staging_audit/branches/kol-merkle-pr4.json",
+      "enabled": false
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+# Routing hint only. This does not enforce review until GitHub branch protection
+# or a ruleset requires code-owner review from a genuinely separate reviewer.
+/memory/ @panboicage-cyber
+/tools/repomemory/ @panboicage-cyber
+/scripts/repo-memory-smoke.sh @panboicage-cyber
+/staging_audit/ @panboicage-cyber
+/profiles/ @panboicage-cyber
+/tools/masteraudit/ @panboicage-cyber
+/scripts/setup-master-audit-workspace.sh @panboicage-cyber
+/scripts/stage-audit.sh @panboicage-cyber
+/AGENTS.md @panboicage-cyber
+/README.md @panboicage-cyber
