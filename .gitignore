@@ -1,0 +1,15 @@
+# Local audit runs and downloaded project data
+audit-artifacts/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.log
+.tmp/
+__pycache__/
+.DS_Store
+# Credentials must never be committed
+.env
+.env.*
+*.pem
+*.key
