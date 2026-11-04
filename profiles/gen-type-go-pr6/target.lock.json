@@ -1,0 +1,41 @@
+{
+  "schema": "qwen-audit-target-lock-v1",
+  "profile_id": "gen-type-go-pr6-v0.4",
+  "target_repo": "https://github.com/es-3581100/Gen_Type-go.git",
+  "pull_request": "https://github.com/es-3581100/Gen_Type-go/pull/6",
+  "source_head": "0af4707d66bb30aef09fe80316c408568e256e53",
+  "source_tree": "121189c9a8beacbddf3545ceeec79afbd8e39ea9",
+  "base_main": "7b071c7c0ed5037b107f4ae9a263f3c06853c46f",
+  "original_v04_head": "f8c6ba9461c01d165313a6bb8b1076d1cea2d576",
+  "parents": [
+    "f8c6ba9461c01d165313a6bb8b1076d1cea2d576",
+    "7b071c7c0ed5037b107f4ae9a263f3c06853c46f"
+  ],
+  "reconciliation_paths": [
+    "CHANGELOG.md", "README.md", "SHA256SUMS", "docs/BUILD_STATUS.md",
+    "docs/GRAPH_INSPECTION_CONTRACT_V0.4.md", "docs/ROADMAP.md",
+    "docs/V0.3_PROMOTION_RECONCILIATION.md"
+  ],
+  "tracked_files_expected": 70,
+  "manifest_entries_expected": 69,
+  "auditgo": {
+    "version": "0.1.3",
+    "registry_sha256": "385eaacb922eefa14231c59cc8c5f5cdfd9633938cc2daa5005045316af6451b",
+    "archive_sha256": "8c8625be74e54b70867196c88312d61b78b28f5737c81b7245b8339ca2e57640",
+    "binary_sha256": "b6c55aa3822c4dc6ae045c6a1f697a8f75903902e9e22ba957fa2e11f3a51a1f"
+  },
+  "audit_types": ["IMPLEMENTATION", "SECURITY_AUTHORITY"],
+  "modules": ["GO_NATIVE_BINARY", "CANONICAL_HASH", "BUILD_PROVENANCE", "CROSS_MODULE_COMPOUND"],
+  "claims": [
+    "Strict graph decoder is the sole validity oracle for inspect and diagnose",
+    "Input, output, and graph resource limits are enforced without partial success",
+    "Graph traversal and diagnostics are deterministic under equivalent valid inputs",
+    "Reconciliation preserves PR5 governance and unchanged v0.4 Go implementation",
+    "Read-only CLI does not promote identity, provenance, permission, or authority"
+  ],
+  "authority_state": "NEGATIVE_DISPOSITION_ORACLE_OPEN__RATIFICATION_PENDING__PHASE1_BLOCKED",
+  "upstream_mutations_authorized": false,
+  "merge_authorized": false,
+  "release_authorized": false,
+  "new_authority_authorized": false
+}
