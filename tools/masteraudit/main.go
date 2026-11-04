@@ -212,6 +212,48 @@ func decodeStrict(data []byte, out any) error {
 	}
 	return nil
 }
+
+// requireExplicitBooleans is called after duplicate-key and unknown-field
+// validation. Go's encoding/json otherwise treats both omitted fields and JSON
+// null as the zero value of bool, blurring a deliberate false with no decision.
+func requireExplicitBooleans(data []byte, keys ...string) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	if raw == nil {
+		return errors.New("expected JSON object for boolean contract")
+	}
+	for _, key := range keys {
+		value, ok := raw[key]
+		if !ok {
+			return fmt.Errorf("missing required boolean field %q", key)
+		}
+		value = bytes.TrimSpace(value)
+		if !bytes.Equal(value, []byte("true")) && !bytes.Equal(value, []byte("false")) {
+			return fmt.Errorf("field %q must be explicit JSON boolean (true or false)", key)
+		}
+	}
+	return nil
+}
+
+// The queue has nested booleans. Require an explicit enabled decision for
+// every entry, including disabled reference-only entries.
+func requireQueueBooleans(data []byte) error {
+	var envelope struct {
+		Items []json.RawMessage `json:"items"`
+	}
+	if err := json.Unmarshal(data, &envelope); err != nil {
+		return err
+	}
+	for i, item := range envelope.Items {
+		if err := requireExplicitBooleans(item, "enabled"); err != nil {
+			return fmt.Errorf("queue items[%d]: %w", i, err)
+		}
+	}
+	return nil
+}
+
 func fileWithHash(root, p, expected string) (string, error) {
 	if !hex64.MatchString(expected) {
 		return "", fmt.Errorf("invalid expected SHA256 for %s", p)
@@ -236,6 +278,9 @@ func check(root string) (Workspace, string, Queue, string, []CheckedStage, error
 	if err := decodeStrict(data, &w); err != nil {
 		return w, "", q, "", nil, err
 	}
+	if err := requireExplicitBooleans(data, "allow_auto_execute", "allow_runtime_memory_writes", "allow_merge", "allow_publish"); err != nil {
+		return w, "", q, "", nil, fmt.Errorf("workspace: %w", err)
+	}
 	wsha := sha(data)
 	if w.Schema != workspaceSchema || w.Name != "master_audit_workspace" || w.Setup != "scripts/setup-master-audit-workspace.sh" || w.AuditGo != "scripts/setup-auditgo.sh" || w.Memory != "memory/catalog.json" || w.Queue != "staging_audit/queue.json" || w.AllowAutoExecute || w.AllowRuntimeMemoryWrites || w.AllowMerge || w.AllowPublish {
 		return w, "", q, "", nil, errors.New("workspace contract mismatch")
@@ -245,6 +290,9 @@ func check(root string) (Workspace, string, Queue, string, []CheckedStage, error
 		return w, "", q, "", nil, err
 	}
 	if err := decodeStrict(data, &q); err != nil {
+		return w, "", q, "", nil, err
+	}
+	if err := requireQueueBooleans(data); err != nil {
 		return w, "", q, "", nil, err
 	}
 	qsha := sha(data)
@@ -269,6 +317,9 @@ func check(root string) (Workspace, string, Queue, string, []CheckedStage, error
 		var s Stage
 		if err := decodeStrict(b, &s); err != nil {
 			return w, "", q, "", nil, err
+		}
+		if err := requireExplicitBooleans(b, "requires_explicit_execution", "allow_upstream_mutation", "allow_merge", "allow_release"); err != nil {
+			return w, "", q, "", nil, fmt.Errorf("stage %s: %w", entry.ID, err)
 		}
 		if s.Schema != stageSchema || s.ID != entry.ID || !hex40.MatchString(s.SourceBranchCommit) || !hex40.MatchString(s.TargetHead) || s.TargetRepository == "" || s.SourceBranch == "" || !s.RequiresExplicitExecution || s.AllowUpstreamMutation || s.AllowMerge || s.AllowRelease {
 			return w, "", q, "", nil, fmt.Errorf("invalid stage contract %s", entry.ID)
@@ -348,6 +399,9 @@ func decodeLock(data []byte, l *Lock) error {
 		if _, ok := raw[k]; !ok {
 			return fmt.Errorf("missing lock field %q", k)
 		}
+	}
+	if err := requireExplicitBooleans(data, "upstream_mutations_authorized", "merge_authorized", "release_authorized", "new_authority_authorized"); err != nil {
+		return fmt.Errorf("target lock: %w", err)
 	}
 	return json.Unmarshal(data, l)
 }
