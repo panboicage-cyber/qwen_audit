@@ -14,3 +14,7 @@ This repository is the audit harness, not the source repository being audited. R
 10. Preserve the original `kol_merkle` historical review artifacts and current branch protection/review boundaries. A green CI/smoke check is not a human approval.
 
 The optional TypeScript projection is a read-only view of Go-validated data. It does not alter selectors, grant permissions, or write memory. `audit-artifacts/` is not a durable memory store and is gitignored.
+
+## Additional pinned, non-operative design review input
+
+At startup `scripts/verify-sql002-design-v02.sh` verifies the SQL-002 v0.2 package under `review_inputs/MA-AUDIT-002/SQL002_DESIGN_REVISION_002/` and the original v0.1 design under `review_inputs/MA-AUDIT-002/SQL002_MACHINE_AUTHORITY_V01/`. For an explicitly requested SQL-002 design review, first read `docs/SQL002_QWEN_INDEPENDENT_REVIEW.md`, then the source handoff. This is **reference input, not a staged audit profile**. Do not change `staging_audit/queue.json`, frozen selectors or mandatory check dispositions. No testing, implementation, signing, approval or gate promotion is implied by loading it.

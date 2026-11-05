@@ -1,0 +1,227 @@
+{
+  "schema": "ma-audit-002.sql002-scoped-machine-authority-design/v0.1",
+  "document_class": "NON_OPERATIVE_DESIGN_PROPOSAL",
+  "frozen_revision": "4d654e8ee11c12e8d10ef27b90ea2e84cf43c55e",
+  "owner_scope_choices": {
+    "SCOPE-01": "A_PROPOSED",
+    "SCOPE-02": "A_PROPOSED",
+    "SCOPE-03": "A_PROPOSED",
+    "SCOPE-04": "A_PROPOSED",
+    "SCOPE-05": "B_PROPOSED",
+    "ratified": false
+  },
+  "user_directions": {
+    "power_loss_durable_acknowledgement_required": true,
+    "trusted_automated_signers_allowed_under_scope": true,
+    "blanket_agent_signing_authority_allowed": false,
+    "production_implementation_authorized": false,
+    "target_execution_authorized": false
+  },
+  "sql002_contracts": [
+    {
+      "id": "SQL002-CONSISTENCY",
+      "recommended_option": "A",
+      "owner_selected_option": null,
+      "status": "PROPOSED_NOT_SELECTED",
+      "scope": "immutable coherent generation; older coherent generation allowed; no freshness guarantee"
+    },
+    {
+      "id": "SQL002-PUBLICATION",
+      "recommended_option": "A",
+      "owner_selected_option": null,
+      "status": "PROPOSED_NOT_SELECTED",
+      "scope": "atomic pointer switch after full generation durability"
+    },
+    {
+      "id": "SQL002-DURABILITY",
+      "recommended_option": "A",
+      "owner_selected_option": null,
+      "status": "USER_REQUIREMENT_CONFIRMED_FORMAL_RATIFICATION_PENDING",
+      "scope": "acknowledged generation survives validated platform power failure"
+    },
+    {
+      "id": "SQL002-AUTHENTICATION",
+      "recommended_option": "A",
+      "owner_selected_option": null,
+      "status": "PROPOSED_NOT_SELECTED",
+      "scope": "root-delegated scoped machine signer; signed exact-generation authorizations"
+    }
+  ],
+  "trust_roles": {
+    "owner_root": {
+      "authority": [
+        "authorize_delegation",
+        "revoke_delegation",
+        "recover_root"
+      ],
+      "key_storage": "OFFLINE_OR_SEPARATE_HARDWARE_ROOT",
+      "agent_access": false
+    },
+    "candidate_producer": {
+      "authority": [
+        "prepare_candidate"
+      ],
+      "private_signing_key": false,
+      "publish_access": false
+    },
+    "machine_principal": {
+      "authority": [
+        "request_scoped_authorization"
+      ],
+      "authority_derivation": "OWNER_SIGNED_DELEGATION_ONLY",
+      "self_delegation": false
+    },
+    "policy_signer_service": {
+      "authority": [
+        "validate_workload",
+        "evaluate_policy",
+        "sign_one_exact_generation"
+      ],
+      "arbitrary_signing_api": false,
+      "agent_writable_policy": false
+    },
+    "publisher": {
+      "authority": [
+        "verify_and_publish_one_generation"
+      ],
+      "signing_permission": false,
+      "agent_direct_access": false
+    },
+    "reader": {
+      "authority": [
+        "verify_and_read_only"
+      ],
+      "trust_root_outside_writable_catalog": true
+    },
+    "independent_reviewer": {
+      "authority": [
+        "review_evidence"
+      ],
+      "publish_or_sign_authority": false
+    }
+  },
+  "required_delegation_fields": [
+    "trust_domain",
+    "workspace_id",
+    "dataset_id",
+    "exact_allowed_paths",
+    "principal_id",
+    "key_id",
+    "operation",
+    "max_files",
+    "max_bytes",
+    "rate_quota",
+    "schema_versions",
+    "policy_digest",
+    "authority_epoch",
+    "not_before",
+    "expires_at"
+  ],
+  "required_authorization_fields": [
+    "contract_version",
+    "trust_domain",
+    "workspace_id",
+    "dataset_id",
+    "generation_id",
+    "previous_generation_id",
+    "sequence",
+    "file_inventory_paths_sizes_sha256",
+    "manifest_digest",
+    "policy_digest",
+    "authority_epoch",
+    "issuer_key_id",
+    "workload_principal",
+    "authorization_id",
+    "operation",
+    "not_before",
+    "expires_at",
+    "signature"
+  ],
+  "cryptographic_design": {
+    "example_algorithm": "Ed25519 (provider/platform suitability to verify)",
+    "canonicalization": "RFC8785 JCS; exact schema and I-JSON; signed domain separation",
+    "root_outside_writable_data": true,
+    "key_provider_choice": "PENDING",
+    "no_working_keys_embedded": true
+  },
+  "policy_requirements": {
+    "default_deny": true,
+    "explicit_native_json_boolean_validation_retained": true,
+    "json_schema_reference_uniqueness_retained": true,
+    "reject_confused_deputy": true,
+    "single_use_authorization": true,
+    "authenticated_workload_identity": true,
+    "policy_and_key_admin_not_agent_writable": true,
+    "revocation_must_be_fresh_at_commit": true,
+    "revocation_max_age_seconds": "OWNER_AND_REVIEWER_TO_SET",
+    "key_expiry": "REQUIRED",
+    "key_rotation": "REQUIRED"
+  },
+  "publication_protocol": [
+    "lock_and_compare_parent_epoch",
+    "dirfd_bound_validation",
+    "write_complete_same_fs_staging",
+    "fsync_all_data_manifest_receipt_and_stage_directory",
+    "rename_stage_to_immutable_generation",
+    "fsync_generations_directory",
+    "fsync_new_current_temp",
+    "atomic_rename_current",
+    "fsync_current_parent",
+    "readback_verify_and_reconcile_durable_receipt",
+    "durable_ack_or_committed_unacknowledged"
+  ],
+  "anti_rollback": {
+    "previous_hash_and_sequence_required": true,
+    "independent_monotonic_epoch_and_sequence_anchor_required": true,
+    "anchor_provider": "PENDING",
+    "old_signed_policy_replay_rejected": true,
+    "revoked_prepublication_key_rejected": true,
+    "compromised_historical_generation_policy": "PENDING"
+  },
+  "receipts": {
+    "authorization_signed": true,
+    "publication_signed_by_separate_identity": true,
+    "one_use_idempotency_key": true,
+    "durable_recovery_outbox": true,
+    "independent_append_only_evidence_store": "REQUIRED",
+    "exact_binary_source_toolchain_provenance": "REQUIRED_FOR_EVIDENCE"
+  },
+  "platform": {
+    "supported_filesystem_profiles": [],
+    "support_status": "UNSELECTED_AND_UNVERIFIED",
+    "power_cut_testing_required": true,
+    "fsync_directory_required": true,
+    "unsupported_storage_fail_closed": true
+  },
+  "preserved_audit_obligations": {
+    "selected_objectives": 296,
+    "mandatory_selected_essential": 34,
+    "sql_whole_checks_unknown": 11,
+    "proposed_mechanism_limitations_not_approved": 15,
+    "certified_counterpart_equivalents": 0,
+    "BLD-005": "ESSENTIAL_UNRESOLVED",
+    "SQL-004": "GENERIC_CONSTRAINTS_RETAINED",
+    "SQL-005": "EXPLICIT_BOOLEANS_RETAINED"
+  },
+  "gate_states": {
+    "gate1": "PENDING",
+    "gate2": "BLOCKED",
+    "gate3": "NOT_AUTHORIZED",
+    "new_approvals": 0
+  },
+  "open_owner_parameters": [
+    "SCOPE_01_TO_05_RATIFICATION",
+    "SQL002_CONSISTENCY_SELECTION",
+    "SQL002_PUBLICATION_SELECTION",
+    "SQL002_AUTHENTICATION_SELECTION",
+    "SIGNED_DELEGATION_ROLES_AND_DATASETS",
+    "MAX_BYTES_RATES_TTL",
+    "CLOCK_AND_REVOCATION_FRESHNESS",
+    "KEY_PROVIDER_AND_ALGORITHM",
+    "SUPPORTED_LINUX_FILESYSTEM_STORAGE_PROFILE",
+    "PROTECTED_ANTI_ROLLBACK_ANCHOR",
+    "RECOVERY_QUARANTINE_POLICY",
+    "AUDIT_STORE_AND_RECEIPT_ACK_CONTRACT",
+    "INDEPENDENT_REVIEW_AUTHORITY"
+  ]
+}

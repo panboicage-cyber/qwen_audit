@@ -13,4 +13,5 @@ sh scripts/auditgo-smoke.sh
 sh scripts/repo-memory-smoke.sh
 go run ./tools/masteraudit/main.go -root "$ROOT" verify
 go run ./tools/masteraudit/main.go -root "$ROOT" list
+sh scripts/verify-sql002-design-v02.sh
 printf '%s\n' 'MASTER_AUDIT_WORKSPACE_READY (no target audit executed; no memory written)'

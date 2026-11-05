@@ -67,3 +67,7 @@ The bundled memory interfaces cannot save or capture observations, but an agent 
 ## Historical first assignment
 
 The original seven-file `kol_merkle` PR #4 assignment is preserved in `prompts/kol-merkle-pr4.md`, `scripts/setup-qwen-target.sh`, `scripts/replay-kol-merkle-pr4.sh`, and `reports/REVIEW_TEMPLATE.md`. It is currently disabled in the unified queue. Run it only through an explicitly reviewed staging change or directly under separate authorization; never substitute its SHA for the active Gen Type-Go target.
+
+## Optional SQL-002 v0.2 independent design review input
+
+The workspace startup checks eight pinned SQL-002 v0.2 design documents plus four original v0.1 design documents, under `review_inputs/MA-AUDIT-002/`. This only makes the reference documents available; no SQL-002 review, executable test, target mutation or gate promotion occurs automatically. Qwen should read `docs/SQL002_QWEN_INDEPENDENT_REVIEW.md` **only when separately tasked** to review that design. The existing queue and Gen Type-Go stage remain unchanged.
